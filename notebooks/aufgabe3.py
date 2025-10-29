@@ -38,13 +38,11 @@ def _(mo):
         r"""
     ## Reaktivität in 3 Zellen
 
-    1. Führen Sie das ganze Skript aus, indem Sie unten rechts auf die **Play-Taste** klicken.
+    1. Führen Sie das ganze Skript aus, indem Sie unten rechts auf die **Play-Taste** klicken. Ändern Sie nun `x` in der ersten Zelle. Was beobachten Sie?
 
     2. Ändern Sie eine der drei Zellen (`declare_x`, `declare_y` oder `declare_z`), so dass die **erste** Bedingung nicht mehr erfüllt ist. Lesen Sie die Fehlermeldung. Warum gilt die **erste** Bedingung? Begründen Sie in Ihren eigenen Worten.
 
     3. Ändern Sie eine der drei Zellen, so dass die **zweite** Bedingung nicht mehr erfüllt ist. Lesen Sie die Fehlermeldung. Warum gilt die **zweite** Bedingung? Begründen Sie in Ihren eigenen Worten.
-
-
     """
     )
     return
