@@ -44,7 +44,7 @@ A complete template should include:
      {% for notebook in notebooks %}
      <div class="notebook-item">
        <h3>{{ notebook.display_name }}</h3>
-       <a href="{{ notebook.html_path }}">Open Notebook</a>
+       <a href="{{ notebook.html_path }}">Aufgabe öffnen</a>
      </div>
      {% endfor %}
    </div>
