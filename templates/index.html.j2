@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>marimo WebAssembly + GitHub Pages Template</title>
+  <title>Programmierunterlagen - Open Government Data</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -90,23 +90,23 @@
     <header>
       <div class="container">
         <img src="https://raw.githubusercontent.com/marimo-team/marimo/main/docs/_static/marimo-logotype-thick.svg" alt="marimo Logo" class="logo">
-        <h1>marimo WebAssembly + GitHub Pages Template</h1>
-        <p class="subtitle">Interactive Python notebooks exported to WebAssembly and deployed to GitHub Pages</p>
+        <h1>Programmierunterlagen - Open Government Data</h1>
+        <p class="subtitle">Orhan Saeedi - Mentorierte Arbeit - Herbstsemester 2025 - Didaktik-Zertifikat Informatik</p>
       </div>
     </header>
 
     <main class="container">
 
     {% if notebooks %}
-    <h2 class="section-title">Notebooks</h2>
-    <p>Interactive notebooks in edit mode - you can modify and experiment with the code</p>
+    <h2 class="section-title">Aufgaben</h2>
+    <p></p>
     <div class="cards">
       {% for notebook in notebooks %}
       <!-- {{ notebook.display_name }} Notebook -->
       <div class="card">
         <div class="card-header">{{ notebook.display_name }}</div>
         <div class="card-body">
-          <a href="{{ notebook.html_path }}" class="card-link">Open Notebook</a>
+          <a href="{{ notebook.html_path }}" class="card-link">Öffnen</a>
         </div>
       </div>
       {% endfor %}
