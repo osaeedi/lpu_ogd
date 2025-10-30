@@ -105,7 +105,6 @@ def _(mo):
     2. Fügen Sie diese URL in der Zelle `get_heizgradtage` bei `url` ein.
 
     3. Implementieren Sie `csv_export_url_to_dataframe(url: str) → pd.DataFrame`, die eine CSV-Datei über eine URL lädt und als DataFrame zurückgibt.
-
     """
     )
     return
@@ -123,7 +122,7 @@ def get_heizgradtage(pd, requests):
         df = pd.read_csv(url)
 
     df
-    return
+    return (url,)
 
 
 @app.cell
@@ -143,6 +142,12 @@ def csv_export_url_to_dataframe(pd):
         # Hier können wir df nochmals zuweisen, da die Variable nur innerhalb der Funktion existiert
         df = None
         return df
+    return (csv_export_url_to_dataframe,)
+
+
+@app.cell
+def use_function(csv_export_url_to_dataframe, url):
+    csv_export_url_to_dataframe(url)
     return
 
 
