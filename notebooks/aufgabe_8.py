@@ -9,7 +9,7 @@
 
 import marimo
 
-__generated_with = "0.17.3"
+__generated_with = "0.17.5"
 app = marimo.App(width="medium", auto_download=["html"])
 
 
@@ -66,7 +66,7 @@ def _(mo):
     Eine gängige Methode ist die **Interquartilsabstand-Methode (IQR-Methode)**.
 
     **IQR-Methode (robust, standard):**
-    - \(Q1\) = 25%-Quantil, \(Q3\) = 75%-Quantil, \(IQR = Q3 - Q1\)
+    - \(Q1 := 25\%\)-Quantil, \(Q3 := 75\%\)-Quantil, \(IQR := Q3 - Q1\)
     - Untere Grenze: \(Q1 - k \cdot IQR\)
     - Obere Grenze: \(Q3 + k \cdot IQR\)
     - $k$ ist der Faktor zur Anpassung der Empfindlichkeit (üblich: $k=1.5$)
@@ -80,13 +80,14 @@ def _(mo):
     mo.md(r"""
     ## Fehlende Werte & Ausreisser (Heizgradtage)
 
-    ```python
-    def find_outliers_iqr(series: pd.Series, k: float = 1.5) -> pd.Series:
-    ```
     1. Zeige alle Zeilen mit fehlenden Werten in der Spalte `Heizgradtag` im DataFrame `df_missing_heizgradtage` an.
     2. Zeige alle Zeilen mit fehlenden Werten in der Spalte `akkumulierteTemperaturdifferenz` im DataFrame `df_missing_temperaturdiff` an.
     3. Sind die beiden DataFrames `df_missing_heizgradtage` und `df_missing_temperaturdiff` identisch?
     4. Implementiere die Funktion `find_outliers_iqr`, die Ausreisser in einer `pd.Series` nach der IQR-Methode (wie oben beschrieben) findet.
+
+    ```python
+    def find_outliers_iqr(series: pd.Series, k: float = 1.5) -> pd.Series:
+    ```
     """)
     return
 
