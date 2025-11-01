@@ -119,7 +119,7 @@ def get_heizgradtage(pd, requests):
     if url:
         resp = requests.get(url)
         resp.raise_for_status()
-        df = pd.read_csv(url)
+        df = pd.read_csv(io.BytesIO(resp.content), sep=None, engine="python", encoding="utf-8")
 
     df
     return (url,)
