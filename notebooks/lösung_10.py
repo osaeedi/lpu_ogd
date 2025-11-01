@@ -10,7 +10,7 @@
 
 import marimo
 
-__generated_with = "0.17.4"
+__generated_with = "0.17.6"
 app = marimo.App(width="medium", auto_download=["html"])
 
 
@@ -21,7 +21,7 @@ def _():
     import requests
     import pandas as pd
     import numpy as np
-    return io, mo, pd, requests
+    return io, mo, np, pd, requests
 
 
 @app.cell
@@ -45,12 +45,12 @@ def csv_export_url_to_dataframe(io, pd, requests):
 
 
 @app.cell
-def get_heizgradtage(csv_export_url_to_dataframe):
+def get_heizgradtage(csv_export_url_to_dataframe, pd):
     url_heizgradtage = "https://data.stadt-zuerich.ch/dataset/umw_heizgradtage_standort_jahr_monat_od1031/download/UMW103OD1031.csv"
     df_heizgradtage = csv_export_url_to_dataframe(url_heizgradtage)
     df_heizgradtage["Jahr_Monat"] = pd.to_datetime(df_heizgradtage["Jahr_Monat"]).dt.to_period("M")
     df_heizgradtage
-    return
+    return (df_heizgradtage,)
 
 
 @app.cell
@@ -88,8 +88,7 @@ def _(mo):
 
 @app.cell
 def filter_temperature_rows(df_tagesmittelwerte):
-    # TODO: Filterung nach Tagesmittel der Lufttemperatur in df_tagesmittelwerte
-    df_temp = df_tagesmittelwerte
+    df_temp = df_tagesmittelwerte.loc[df_tagesmittelwerte['Parameter'] == 'T']
     df_temp
     return (df_temp,)
 
@@ -107,8 +106,7 @@ def _(mo):
 
 @app.cell
 def manipulate_standort(df_temp):
-    # TODO: Spalte Standort manipulieren
-    df_temp_manipulated = df_temp
+    df_temp_manipulated = df_temp.replace({"Standort": {"Zch_": ""}}, regex=True)
     df_temp_manipulated
     return (df_temp_manipulated,)
 
@@ -130,11 +128,10 @@ def _(mo):
 
 
 @app.cell
-def compute_hgt_and_monthly(df_temp_manipulated):
-    # TODO: Berechnen Sie `Heizgradtag` und `akkumulierteTemperaturdifferenz` als neue Spalten
+def compute_hgt_and_monthly(df_temp_manipulated, np):
     df_temp_calculated = df_temp_manipulated
-    df_temp_calculated["Heizgradtag"] = 0
-    df_temp_calculated["akkumulierteTemperaturdifferenz"] = 0
+    df_temp_calculated["Heizgradtag"] = np.where(df_temp_calculated["Wert"] < 12, 20 - df_temp_calculated["Wert"], 0)
+    df_temp_calculated["akkumulierteTemperaturdifferenz"] = np.maximum(0, 12 - df_temp_calculated["Wert"])
     df_temp_calculated
     return (df_temp_calculated,)
 
@@ -155,10 +152,12 @@ def aggregate_monthly(df_temp_calculated, pd):
     df_monthly = df_temp_calculated
     df_monthly["Datum"] = pd.to_datetime(df_monthly["Datum"])
     df_monthly["Jahr_Monat"] = df_monthly["Datum"].dt.to_period("M")
-    # TODO: Gruppieren nach Jahr_Monat und Standort und Aggregation der berechneten Spalten
-    df_monthly = df_temp_calculated
+    df_monthly = df_temp_calculated.groupby(["Jahr_Monat", "Standort"]).agg({
+        "Heizgradtag": "sum",
+        "akkumulierteTemperaturdifferenz": "sum"
+    }).reset_index()
     df_monthly
-    return
+    return (df_monthly,)
 
 
 @app.cell(hide_code=True)
@@ -173,12 +172,22 @@ def _(mo):
     """)
     return
 
+
 @app.cell
-def _(pd):
-    # TODO: Merge mit df_heizgradtage und Differenzen berechnen
-    df_merged = pd.DataFrame()  # Platzhalter für den Merge
+def _(df_heizgradtage, df_monthly, pd):
+    df_merged = pd.merge(
+        df_monthly,
+        df_heizgradtage,
+        left_on=["Jahr_Monat", "Standort"],
+        right_on=["Jahr_Monat", "Standort"],
+        suffixes=("_berechnet", "_referenz"),
+        how="inner"
+    )
+    df_merged["Heizgradtag_Differenz"] = df_merged["Heizgradtag_berechnet"] - df_merged["Heizgradtag_referenz"]
+    df_merged["akkumulierteTemperaturdifferenz_Differenz"] = df_merged["akkumulierteTemperaturdifferenz_berechnet"] - df_merged["akkumulierteTemperaturdifferenz_referenz"]
     df_merged
     return
+
 
 if __name__ == "__main__":
     app.run()
