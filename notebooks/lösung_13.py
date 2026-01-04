@@ -48,25 +48,26 @@ def csv_export_url_to_dataframe(io, pd, requests):
 def get_tagesmittelwerte_2024(csv_export_url_to_dataframe):
     url_tagesmittelwerte = "https://data.stadt-zuerich.ch/dataset/ugz_meteodaten_tagesmittelwerte/download/ugz_ogd_meteo_d1_2024.csv"
     df_tagesmittelwerte = csv_export_url_to_dataframe(url_tagesmittelwerte)
-    df_tagesmittelwerte
-    return (df_tagesmittelwerte,)
+    # Schritt 1: Filterung nach Tagesmittel der Lufttemperatur (aus Aufgabe 12)
+    df_temp = df_tagesmittelwerte.loc[df_tagesmittelwerte['Parameter'] == 'T']
+    return (df_temp,)
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    Filtern Sie in `df_tagesmittelwerte` die Zeilen mit **Tagesmittel der Lufttemperatur**.
+    Manipulieren Sie `Standort` in `df_temp`, sodass die Namen zu `df_heizgradtage` passen (einheitliche Schreibweise).
 
     **pandas-Konzepte:**
-    - `DataFrame.loc[mask, :]` oder `query()` zum Filtern
+    - string-Operationen via `DataFrame.replace()`
     """)
     return
 
 
 @app.cell
-def filter_temperature_rows(df_tagesmittelwerte):
-    df_temp = df_tagesmittelwerte.loc[df_tagesmittelwerte['Parameter'] == 'T']
-    df_temp
+def manipulate_standort(df_temp):
+    df_temp_manipulated = df_temp.replace({"Standort": {"Zch_": ""}}, regex=True)
+    df_temp_manipulated
     return
 
 

@@ -10,16 +10,8 @@
 
 import marimo
 
-__generated_with = "0.17.5"
+__generated_with = "0.18.4"
 app = marimo.App(width="medium", auto_download=["html"])
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""
-    # Musterlösung – Kontrollaufgaben
-    """)
-    return
 
 
 @app.cell
@@ -60,72 +52,12 @@ def get_heizgradtage(csv_export_url_to_dataframe):
     return (df_heizgradtage,)
 
 
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Kontrollaufgabe 1 – Musterlösung
-
-    Die Heizgradtage (HGT) sind ein Mass für den Einfluss des Wetters auf den Heizenergieverbrauch eines Gebäudes. Gibt es einen Datensatz, der belegen könnte, dass weniger geheizt wird, wenn die Heizgradtage kleiner sind?
-    """)
-    return
-
-
 @app.cell
 def get_energieverbrauch(csv_export_url_to_dataframe):
     url_energie = "https://data.stadt-zuerich.ch/dataset/ugz_endenergiebilanz/download/ugz_endenergiebilanz.csv"
     df_energieverbrauch = csv_export_url_to_dataframe(url_energie)
     df_energieverbrauch
     return (df_energieverbrauch,)
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Kontrollaufgabe 2 – Musterlösung
-
-    Was fällt Ihnen an den Werten der Spalte `Holz_UW_BG_SK` auf? Identifizieren Sie Ausreisser (Outliers). Warum werden so viele Werte als Ausreisser erkannt?
-    """)
-    return
-
-
-@app.cell
-def outlier_function(pd):
-    def is_outlier_iqr(series: pd.Series, k: float = 1.5) -> pd.Series:
-        """
-        IQR-basierte Ausreisser-Erkennung.
-
-        Args:
-            series: Numerische Werte.
-            k: Multiplikator für die IQR-Bandbreite (Standard 1.5).
-
-        Returns:
-            Boolesche Maske gleicher Länge (True = Ausreisser).
-        """
-        s = pd.to_numeric(series, errors="coerce")
-        q1 = s.quantile(0.25, interpolation="linear")
-        q3 = s.quantile(0.75, interpolation="linear")
-        iqr = q3 - q1
-        lower = q1 - k * iqr
-        upper = q3 + k * iqr
-        mask = (s < lower) | (s > upper)
-        return mask.fillna(False)
-    return (is_outlier_iqr,)
-
-
-@app.cell
-def get_outliers(df_energieverbrauch, is_outlier_iqr):
-    df_outliers = df_energieverbrauch[is_outlier_iqr(df_energieverbrauch["Holz_UW_BG_SK"])]
-    df_outliers
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""
-    ## Kontrollaufgabe 3 – Musterlösung
-    Die Spalten `Holz_UW_BG_SK`, `Fernwaerme`, `Erdgas` und `Heizoel_EL` erfassen Energieträger zu Heizzwecken. Erstellen Sie aus `df_heizgradtage` und `df_energieverbrauch` ein DataFrame mit `Jahr`, `Heizgradtag`, `Heizenergieverbrauch`.
-    """)
-    return
 
 
 @app.cell
@@ -145,8 +77,6 @@ def transform_and_merge(df_energieverbrauch, df_heizgradtage, pd):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## Kontrollaufgabe 4 – Musterlösung
-
     Visualisieren Sie den Zusammenhang zwischen Heizgradtagen und Heizenergieverbrauch mittels Scatterplot. Entspricht das Ihrer Erwartung? Begründen Sie. Welche Informationen fehlen für eine Beurteilung?
     """)
     return

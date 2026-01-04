@@ -48,25 +48,36 @@ def csv_export_url_to_dataframe(io, pd, requests):
 def get_tagesmittelwerte_2024(csv_export_url_to_dataframe):
     url_tagesmittelwerte = "https://data.stadt-zuerich.ch/dataset/ugz_meteodaten_tagesmittelwerte/download/ugz_ogd_meteo_d1_2024.csv"
     df_tagesmittelwerte = csv_export_url_to_dataframe(url_tagesmittelwerte)
-    df_tagesmittelwerte
-    return (df_tagesmittelwerte,)
+    # Schritt 1: Filterung nach Tagesmittel der Lufttemperatur (aus Aufgabe 12)
+    df_temp = df_tagesmittelwerte.loc[df_tagesmittelwerte['Parameter'] == 'T']
+    # Schritt 2: Standort manipulieren (aus Aufgabe 13)
+    df_temp_manipulated = df_temp.replace({"Standort": {"Zch_": ""}}, regex=True)
+    return (df_temp_manipulated,)
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    Filtern Sie in `df_tagesmittelwerte` die Zeilen mit **Tagesmittel der Lufttemperatur**.
+    Berechnen Sie `Heizgradtag` und `akkumulierteTemperaturdifferenz` nach der Definition im Datensatz [**"Heizgradtage und akkumulierte Temperaturdifferenzen für verschiedene Standorte in der Stadt Zürich"**](https://data.stadt-zuerich.ch/dataset/umw_heizgradtage_standort_jahr_monat_od1031).
+
+    - **Heizgradtag (HGT)** pro Tag: Wenn T < 12 °C, dann `20 - T`, sonst 0
+    - **ATD (akk. Temp.-Differenz)** pro Tag: `max(0, 12 - T)`
 
     **pandas-Konzepte:**
-    - `DataFrame.loc[mask, :]` oder `query()` zum Filtern
+    - Neue Spalten via `df["neue_spalte"] = ...`
+    - Bedingte Logik via `np.where()`
+    - Maximum-Funktion via `np.maximum(...)`
     """)
     return
 
 
 @app.cell
-def filter_temperature_rows(df_tagesmittelwerte):
-    df_temp = df_tagesmittelwerte.loc[df_tagesmittelwerte['Parameter'] == 'T']
-    df_temp
+def compute_hgt_and_monthly(df_temp_manipulated):
+    # TODO: Berechnen Sie `Heizgradtag` und `akkumulierteTemperaturdifferenz` als neue Spalten
+    df_temp_calculated = df_temp_manipulated
+    df_temp_calculated["Heizgradtag"] = 0
+    df_temp_calculated["akkumulierteTemperaturdifferenz"] = 0
+    df_temp_calculated
     return
 
 

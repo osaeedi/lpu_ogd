@@ -9,7 +9,7 @@
 
 import marimo
 
-__generated_with = "0.17.6"
+__generated_with = "0.18.4"
 app = marimo.App(width="medium", auto_download=["html"])
 
 
@@ -24,20 +24,30 @@ def _(mo):
     mo.md(r"""
     # Programmierschnittstellen (APIs)
 
-    Eine **API** (Application Programming Interface) ist eine definierte Schnittstelle zwischen zwei Programmen oder Diensten, über die strukturierte Daten oder Funktionen automatisiert ausgetauscht werden können.
+    Eine **API** (Application Programming Interface) ist eine klar definierte Schnittstelle, über die Programme oder Dienste automatisiert Daten oder Funktionen austauschen können.
 
-    Man kann sich APIs wie *Lego-Bausteine* vorstellen: Jeder Dienst oder jede Anwendung ist ein Baustein mit bestimmten Fähigkeiten.
-    Durch klar definierte Verbindungsstellen – die API – können diese Bausteine miteinander kombiniert werden.
-    So entstehen neue, komplexe Anwendungen, ohne dass jedes Teil von Grund auf neu entwickelt werden muss.
+    APIs ermöglichen den standardisierten Zugriff auf Daten, ohne dass deren interne Struktur oder Speicherung bekannt sein muss.
 
-    APIs sind zentral für viele datengetriebene Prozesse: Sie machen Daten maschinenlesbar zugänglich und ermöglichen skalierbare Analysen in Echtzeit.
+    Man kann sich APIs wie Steckverbindungen oder Bausteine vorstellen:
+    Ein Dienst stellt Daten oder Funktionen bereit, ein anderes Programm greift gezielt darauf zu.
+    Entscheidend ist dabei nicht, wie der Dienst intern implementiert ist, sondern **wie** man ihn ansprechen darf und **was** man zurückbekommt.
 
-    Eine besonders verbreitete Form offener Datenschnittstellen ist die **REST-API** (Representational State Transfer).
-    Sie basiert auf einfachen HTTP-Anfragen – wie `GET`, `POST`, `PUT` oder `DELETE` – und liefert meist Daten im `JSON`- oder `XML`-Format zurück.
-    So kann z. B. eine `GET`-Anfrage an eine bestimmte URL einen aktuellen Datensatz abrufen, etwa zu Wetter, Verkehr oder Finanzen.
+    APIs sind zentral für datengetriebene Anwendungen: Sie machen Daten maschinenlesbar, aktuell und skalierbar zugänglich.
+
+    Eine besonders verbreitete Form von APIs sind sogenannte **REST-APIs** (Representational State Transfer).
+
+    REST-APIs basieren auf dem HTTP-Protokoll, das auch beim Aufrufen von Webseiten verwendet wird.
+
+    Typische HTTP-Anfragen sind:
+    * `GET` – Daten abrufen,
+    * `POST` – neue Daten senden,
+    * `PUT` – bestehende Daten ändern,
+    * `DELETE` – Daten löschen.
+
+    Für den reinen Datenabruf ist insbesondere `GET` relevant.
 
     In **Python** wird für den Zugriff auf REST-APIs typischerweise die Bibliothek `requests` verwendet.
-    Sie erlaubt das einfache Senden von HTTP-Anfragen und das Weiterverarbeiten der erhaltenen Daten – oft in wenigen Zeilen Code.
+    Sie erlaubt es, HTTP-Anfragen zu senden und die Antwort weiterzuverarbeiten – oft in nur wenigen Zeilen Code.
     """)
     return
 
@@ -95,11 +105,20 @@ def _(mo):
     mo.md(r"""
     ## Daten per REST-API (Heizgradtage und akkumulierte Temperaturdifferenzen)
 
-    1. Suchen Sie auf [opendata.swiss](https://opendata.swiss) den Datensatz **„Heizgradtage und akkumulierte Temperaturdifferenzen für verschiedene Standorte in der Stadt Zürich“**. Öffnen Sie **Preview** → kopieren Sie die **Download-URL** von `UMW103OD1031.csv`.
+    1. Öffnen Sie [opendata.swiss](https://opendata.swiss) und suchen Sie den Datensatz
+       **„Heizgradtage und akkumulierte Temperaturdifferenzen für verschiedene Standorte in der Stadt Zürich“**.
+       Öffnen Sie die **Preview** des Datensatzes.
 
-    2. Fügen Sie diese URL in der Zelle `get_heizgradtage` bei `url` ein.
+    2. Kopieren Sie die **Download-URL** der CSV-Datei `UMW103OD1031.csv`.
 
-    3. Implementieren Sie `csv_export_url_to_dataframe(url: str) → pd.DataFrame`, die eine CSV-Datei über eine URL lädt und als DataFrame zurückgibt.
+    3. Fügen Sie diese URL in der Zelle `get_heizgradtage` in die Variable `url` ein.
+
+    4. Implementieren Sie die Funktion
+       `csv_export_url_to_dataframe(url: str)`, die:
+       - eine beliebige CSV-Datei über die angegebene URL lädt (sofern die REST-API dies zulässt),
+       - und die Daten als DataFrame zurückgibt.
+
+    5. Überprüfen Sie das Ergebnis, indem Sie sich die ersten Zeilen des DataFrames anzeigen lassen.
     """)
     return
 

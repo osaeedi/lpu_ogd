@@ -10,7 +10,7 @@
 
 import marimo
 
-__generated_with = "0.17.6"
+__generated_with = "0.18.4"
 app = marimo.App(width="medium", auto_download=["html"])
 
 
@@ -54,116 +54,31 @@ def get_heizgradtage(csv_export_url_to_dataframe, pd):
 
 
 @app.cell
-def get_tagesmittelwerte_2024(csv_export_url_to_dataframe):
+def get_tagesmittelwerte_2024(csv_export_url_to_dataframe, np, pd):
     url_tagesmittelwerte = "https://data.stadt-zuerich.ch/dataset/ugz_meteodaten_tagesmittelwerte/download/ugz_ogd_meteo_d1_2024.csv"
     df_tagesmittelwerte = csv_export_url_to_dataframe(url_tagesmittelwerte)
-    df_tagesmittelwerte
-    return (df_tagesmittelwerte,)
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Daten transformieren (Tagesmittelwerte zu Heizgradtage)
-
-    1. Filtern Sie in `df_tagesmittelwerte` die Zeilen mit **Tagesmittel der Lufttemperatur**.
-    2. Manipulieren Sie `Standort` in `df_tagesmittelwerte`, sodass die Namen zu `df_heizgradtage` passen (einheitliche Schreibweise).
-    3. Berechnen Sie `Heizgradtag` und `akkumulierteTemperaturdifferenz` nach der Definition im Datensatz [**"Heizgradtage und akkumulierte Temperaturdifferenzen für verschiedene Standorte in der Stadt Zürich"**](https://data.stadt-zuerich.ch/dataset/umw_heizgradtage_standort_jahr_monat_od1031).
-    4. Aggregieren Sie den Datensatz `df_tagesmittelwerte` nach `Monat`, `Jahr` und `Standort`.
-    5. Vergleichen Sie das Resultat mit `df_heizgradtage`. Was fällt Ihnen auf?
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ### 1) Relevante Zeilen auswählen (Temperatur-Mittelwerte)
-
-    **pandas-Konzepte:**
-    - `DataFrame.loc[mask, :]` oder `query()` zum Filtern
-    """)
-    return
-
-
-@app.cell
-def filter_temperature_rows(df_tagesmittelwerte):
+    # Schritt 1: Filterung nach Tagesmittel der Lufttemperatur (aus Aufgabe 12)
     df_temp = df_tagesmittelwerte.loc[df_tagesmittelwerte['Parameter'] == 'T']
-    df_temp
-    return (df_temp,)
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ### 2) Spalte `Standort` manipulieren (Tagesdaten ↔ Referenzdatensatz)
-
-    **pandas-Konzepte:**
-    - string-Operationen via `DataFrame.replace()`
-    """)
-    return
-
-
-@app.cell
-def manipulate_standort(df_temp):
+    # Schritt 2: Standort manipulieren (aus Aufgabe 13)
     df_temp_manipulated = df_temp.replace({"Standort": {"Zch_": ""}}, regex=True)
-    df_temp_manipulated
-    return (df_temp_manipulated,)
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ### 3) Heizgradtag & akkumulierte Temperaturdifferenz berechnen
-
-    - **Heizgradtag (HGT)** pro Tag: Wenn T < 12 °C, dann `20 - T`, sonst 0
-    - **ATD (akk. Temp.-Differenz)** pro Tag: `max(0, 12 - T)`
-
-    **pandas-Konzepte:**
-    - Neue Spalten via `df["neue_spalte"] = ...`
-    - Bedingte Logik via `np.where()`
-    - Maximum-Funktion via `np.maximum(...)`
-    """)
-    return
-
-
-@app.cell
-def compute_hgt_and_monthly(df_temp_manipulated, np):
-    df_temp_calculated = df_temp_manipulated
+    # Schritt 3: Heizgradtag & akkumulierte Temperaturdifferenz berechnen (aus Aufgabe 14)
+    df_temp_calculated = df_temp_manipulated.copy()
     df_temp_calculated["Heizgradtag"] = np.where(df_temp_calculated["Wert"] < 12, 20 - df_temp_calculated["Wert"], 0)
     df_temp_calculated["akkumulierteTemperaturdifferenz"] = np.maximum(0, 12 - df_temp_calculated["Wert"])
-    df_temp_calculated
-    return (df_temp_calculated,)
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ### 4) Aggregation nach `Jahr`, `Monat` und `Standort`
-
-    **pandas-Konzepte:**
-    - `groupby(...).agg()`
-    """)
-    return
-
-
-@app.cell
-def aggregate_monthly(df_temp_calculated, pd):
-    df_monthly = df_temp_calculated
-    df_monthly["Datum"] = pd.to_datetime(df_monthly["Datum"])
-    df_monthly["Jahr_Monat"] = df_monthly["Datum"].dt.to_period("M")
+    # Schritt 4: Aggregation nach Jahr, Monat und Standort (aus Aufgabe 15)
+    df_temp_calculated["Datum"] = pd.to_datetime(df_temp_calculated["Datum"])
+    df_temp_calculated["Jahr_Monat"] = df_temp_calculated["Datum"].dt.to_period("M")
     df_monthly = df_temp_calculated.groupby(["Jahr_Monat", "Standort"]).agg({
         "Heizgradtag": "sum",
         "akkumulierteTemperaturdifferenz": "sum"
     }).reset_index()
-    df_monthly
     return (df_monthly,)
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ### 5) Vergleich mit Referenz (Heizgradtage-Monatsdatensatz)
+    Vergleichen Sie das Resultat `df_monthly` mit `df_heizgradtage`. Sind die beiden DataFrames gleich?
 
     Wir mergen beide Tabellen auf `Standort`, `Jahr_Monat` und bilden Differenzen.
 
@@ -186,6 +101,16 @@ def _(df_heizgradtage, df_monthly, pd):
     df_merged["Heizgradtag_Differenz"] = df_merged["Heizgradtag_berechnet"] - df_merged["Heizgradtag_referenz"]
     df_merged["akkumulierteTemperaturdifferenz_Differenz"] = df_merged["akkumulierteTemperaturdifferenz_berechnet"] - df_merged["akkumulierteTemperaturdifferenz_referenz"]
     df_merged
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Antwort
+
+    Die beiden DataFrames sind **nicht exakt gleich**, aber die Differenzen sind sehr klein (meist unter 0.5). Die kleinen Abweichungen entstehen vermutlich durch Rundungen bei der Berechnung der Tagesmittelwerte oder durch unterschiedliche Präzision bei der Aggregation. Für einige Standorte (z.B. Rosengartenstrasse in März und April) fehlen Referenzwerte im Originaldatensatz.
+    """)
     return
 
 

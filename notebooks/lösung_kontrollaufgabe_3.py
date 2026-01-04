@@ -10,16 +10,8 @@
 
 import marimo
 
-__generated_with = "0.17.5"
+__generated_with = "0.18.4"
 app = marimo.App(width="medium", auto_download=["html"])
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""
-    # Kontrollaufgaben
-    """)
-    return
 
 
 @app.cell
@@ -57,45 +49,36 @@ def get_heizgradtage(csv_export_url_to_dataframe):
     url_hgt = "https://data.stadt-zuerich.ch/dataset/umw_heizgradtage_standort_jahr_monat_od1031/download/UMW103OD1031.csv"
     df_heizgradtage = csv_export_url_to_dataframe(url_hgt)
     df_heizgradtage
-    return
+    return (df_heizgradtage,)
 
 
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Kontrollaufgabe 1
-
-    Die Heizgradtage (HGT) sind ein Mass für den Einfluss des Wetters auf den Heizenergieverbrauch eines Gebäudes. Gibt es einen Datensatz, der belegen könnte, dass weniger geheizt wird, wenn die Heizgradtage kleiner sind?
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Kontrollaufgabe 2
-
-    Was fällt Ihnen an den Werten der Spalte `Holz_UW_BG_SK` auf? Identifizieren Sie Ausreisser (Outliers). Warum werden so viele Werte als Ausreisser erkannt?
-    """)
-    return
+@app.cell
+def get_energieverbrauch(csv_export_url_to_dataframe):
+    url_energie = "https://data.stadt-zuerich.ch/dataset/ugz_endenergiebilanz/download/ugz_endenergiebilanz.csv"
+    df_energieverbrauch = csv_export_url_to_dataframe(url_energie)
+    df_energieverbrauch
+    return (df_energieverbrauch,)
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md("""
-    ## Kontrollaufgabe 3
     Die Spalten `Holz_UW_BG_SK`, `Fernwaerme`, `Erdgas` und `Heizoel_EL` erfassen Energieträger zu Heizzwecken. Erstellen Sie aus `df_heizgradtage` und `df_energieverbrauch` ein DataFrame mit `Jahr`, `Heizgradtag`, `Heizenergieverbrauch`.
     """)
     return
 
 
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    ## Kontrollaufgabe 4
-
-    Visualisieren Sie den Zusammenhang zwischen Heizgradtagen und Heizenergieverbrauch mittels Scatterplot. Entspricht das Ihrer Erwartung? Begründen Sie. Welche Informationen fehlen für eine Beurteilung?
-    """)
+@app.cell
+def transform_and_merge(df_energieverbrauch, df_heizgradtage, pd):
+    heiz_cols = ["Holz_UW_BG_SK", "Fernwaerme", "Erdgas", "Heizoel_EL"]
+    df_heiz = (
+        df_energieverbrauch[["Jahr", *heiz_cols]]
+        .assign(Heizenergieverbrauch=lambda d: d[heiz_cols].sum(axis=1, numeric_only=True))
+        [["Jahr", "Heizenergieverbrauch"]]
+    )
+    df_hgt_jahr = df_heizgradtage.groupby("Jahr", as_index=False)["Heizgradtag"].sum()
+    df_merged = pd.merge(df_heiz, df_hgt_jahr, on="Jahr", how="left")
+    df_merged
     return
 
 

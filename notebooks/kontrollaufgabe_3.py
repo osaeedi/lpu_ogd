@@ -2,7 +2,7 @@
 # requires-python = ">=3.12"
 # dependencies = [
 #     "marimo",
-#     "numpy==2.3.4",
+#     "matplotlib==3.10.7",
 #     "pandas==2.3.3",
 #     "requests==2.32.5",
 # ]
@@ -14,13 +14,21 @@ __generated_with = "0.18.4"
 app = marimo.App(width="medium", auto_download=["html"])
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md("""
+ 
+    """)
+    return
+
+
 @app.cell
 def _():
     import marimo as mo
     import io
     import requests
     import pandas as pd
-    import numpy as np
+    import matplotlib.pyplot as plt
     return io, mo, pd, requests
 
 
@@ -45,28 +53,26 @@ def csv_export_url_to_dataframe(io, pd, requests):
 
 
 @app.cell
-def get_tagesmittelwerte_2024(csv_export_url_to_dataframe):
-    url_tagesmittelwerte = "https://data.stadt-zuerich.ch/dataset/ugz_meteodaten_tagesmittelwerte/download/ugz_ogd_meteo_d1_2024.csv"
-    df_tagesmittelwerte = csv_export_url_to_dataframe(url_tagesmittelwerte)
-    df_tagesmittelwerte
-    return (df_tagesmittelwerte,)
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    Filtern Sie in `df_tagesmittelwerte` die Zeilen mit **Tagesmittel der Lufttemperatur**.
-
-    **pandas-Konzepte:**
-    - `DataFrame.loc[mask, :]` oder `query()` zum Filtern
-    """)
+def get_heizgradtage(csv_export_url_to_dataframe):
+    url_hgt = "https://data.stadt-zuerich.ch/dataset/umw_heizgradtage_standort_jahr_monat_od1031/download/UMW103OD1031.csv"
+    df_heizgradtage = csv_export_url_to_dataframe(url_hgt)
+    df_heizgradtage
     return
 
 
 @app.cell
-def filter_temperature_rows(df_tagesmittelwerte):
-    df_temp = df_tagesmittelwerte.loc[df_tagesmittelwerte['Parameter'] == 'T']
-    df_temp
+def get_energieverbrauch(csv_export_url_to_dataframe):
+    url_energie = "https://data.stadt-zuerich.ch/dataset/ugz_endenergiebilanz/download/ugz_endenergiebilanz.csv"
+    df_energieverbrauch = csv_export_url_to_dataframe(url_energie)
+    df_energieverbrauch
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md("""
+    Die Spalten `Holz_UW_BG_SK`, `Fernwaerme`, `Erdgas` und `Heizoel_EL` erfassen Energieträger zu Heizzwecken. Erstellen Sie aus `df_heizgradtage` und `df_energieverbrauch` ein DataFrame mit `Jahr`, `Heizgradtag`, `Heizenergieverbrauch`.
+    """)
     return
 
 

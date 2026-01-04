@@ -2,7 +2,6 @@
 # requires-python = ">=3.12"
 # dependencies = [
 #     "marimo",
-#     "matplotlib==3.10.7",
 #     "numpy==2.3.4",
 #     "pandas==2.3.3",
 #     "requests==2.32.5",
@@ -11,48 +10,8 @@
 
 import marimo
 
-__generated_with = "0.17.5"
+__generated_with = "0.18.4"
 app = marimo.App(width="medium", auto_download=["html"])
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # Aufgabe 12 — Daten visualisieren
-
-    In dieser Aufgabe arbeiten Sie mit Heizgradtagen der Stadt Zürich und erstellen drei Diagrammtypen:
-    **Linie**, **Balken** und **Streudiagramm**. Hier eine kleine Intro zu matplotlib:
-    ```python
-    import matplotlib.pyplot as plt
-
-    # kleines Demo-Dataset für die drei Diagrammtypen
-    demo = pd.DataFrame({
-        "x": np.arange(1, 7),
-        "y": np.array([3, 5, 2, 6, 4, 7]),
-        "kategorie": ["A", "B", "C", "D", "E", "F"],
-    })
-    demo
-
-    # 1) Liniendiagramm
-    plt.figure()
-    plt.plot(demo["x"], demo["y"], marker="o")
-    plt.title("Linie"); plt.xlabel("x"); plt.ylabel("y"); plt.grid(True)
-    plt.show()
-
-    # 2) Balkendiagramm
-    plt.figure()
-    plt.bar(demo["kategorie"], demo["y"])
-    plt.title("Balken"); plt.xlabel("Kategorie"); plt.ylabel("Wert")
-    plt.show()
-
-    # 3) Streudiagramm
-    plt.figure()
-    plt.scatter(demo["x"], demo["y"])
-    plt.title("Streuung"); plt.xlabel("x"); plt.ylabel("y"); plt.grid(True)
-    plt.show()
-    ```
-    """)
-    return
 
 
 @app.cell
@@ -86,80 +45,29 @@ def csv_export_url_to_dataframe(io, pd, requests):
 
 
 @app.cell
-def get_heizgradtage(csv_export_url_to_dataframe):
-    url_heizgradtage = "https://data.stadt-zuerich.ch/dataset/umw_heizgradtage_standort_jahr_monat_od1031/download/UMW103OD1031.csv"
-    df_heizgradtage = csv_export_url_to_dataframe(url_heizgradtage)
-    df_heizgradtage
-    return (df_heizgradtage,)
+def get_tagesmittelwerte_2024(csv_export_url_to_dataframe):
+    url_tagesmittelwerte = "https://data.stadt-zuerich.ch/dataset/ugz_meteodaten_tagesmittelwerte/download/ugz_ogd_meteo_d1_2024.csv"
+    df_tagesmittelwerte = csv_export_url_to_dataframe(url_tagesmittelwerte)
+    df_tagesmittelwerte
+    return (df_tagesmittelwerte,)
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    ## Daten visualisieren (Heizgradtage, Standort **Fluntern**)
+    Filtern Sie in `df_tagesmittelwerte` die Zeilen mit **Tagesmittel der Lufttemperatur**.
 
-    1. Filtern Sie auf `Standort == "Fluntern"`. Wandeln Sie `Jahr_Monat` in `datetime` (`YYYY-MM`) um, sortieren Sie nach Zeit.
-
-    2. Untersuchen Sie mithilfe eines Streudiagramms, ob `Heizgradtag` und `akkumulierteTemperaturdifferenz` zusammenhängen.
-
-    3. Bilden Sie den Monatsdurchschnitt von `Heizgradtag` (Gruppe: `Monat`). Balkendiagramm der 12 Monatsmittel. Nennen Sie den Monat mit dem **höchsten** Mittelwert.
-
-    4. Wählen Sie den Monat aus 3 (mit dem höchsten Mittelwert), filtern Sie auf diesen Monat und visualisieren Sie `Heizgradtag` über die Jahre (Liniendiagramm mit Markern). Beurteilen Sie knapp, ob über die Jahre eher **Rückgang**, **Anstieg** oder **kein klarer Trend** erkennbar ist.
+    **pandas-Konzepte:**
+    - `DataFrame.loc[mask, :]` oder `query()` zum Filtern
     """)
     return
 
 
 @app.cell
-def _(df_heizgradtage):
-    # TODO: Filtern Sie auf `Standort == "Fluntern"`. Wandeln Sie `Jahr_Monat` in `datetime` (`YYYY-MM`) um, sortieren Sie nach Zeit.
-    df_heizgradtage_fluntern = df_heizgradtage
-    df_heizgradtage_fluntern
-    return (df_heizgradtage_fluntern,)
-
-
-@app.cell
-def _():
-    import matplotlib.pyplot as plt
-    return (plt,)
-
-
-@app.cell
-def _(plt):
-    # TODO: Untersuchen Sie mithilfe eines Streudiagramms, ob `Heizgradtag` und `akkumulierteTemperaturdifferenz` zusammenhängen.
-    plt.figure(figsize=(12, 6))
-    plt.title("Heizgradtag vs. akkumulierte Temperaturdifferenz (Fluntern)")
-    plt.xlabel("Heizgradtag")
-    plt.ylabel("akkumulierte Temperaturdifferenz")
-    plt.show()
-
-    return
-
-
-@app.cell
-def _(df_heizgradtage_fluntern, plt):
-    # TODO: Bilden Sie den Monatsdurchschnitt von `Heizgradtag` (Gruppe: `Monat`). 
-    avg_heizgradtage_per_month = df_heizgradtage_fluntern
-
-    # TODO: Balkendiagramm der 12 Monatsmittel. Nennen Sie den Monat mit dem **höchsten** Mittelwert.
-    plt.figure(figsize=(10, 6))
-    plt.title("Durchschnittliche Heizgradtage pro Monat (Fluntern)")
-    plt.xlabel("Monat (1–12)")
-    plt.ylabel("Durchschnittliche Heizgradtage")
-    plt.show()
-    return
-
-
-@app.cell
-def _(df_heizgradtage_fluntern, plt):
-    # TODO: Filtern Sie den Monat mit dem höchsten Mittelwert
-    df_heizgradtage_fluntern_monat = df_heizgradtage_fluntern
-    # TODO: Visualisieren Sie `Heizgradtag` über die Jahre (Liniendiagramm mit Markern).
-    plt.figure(figsize=(12, 6))
-    plt.title(f"Heizgradtage im Monat .... über die Jahre (Fluntern)")
-    plt.xlabel("Jahr")
-    plt.ylabel("Heizgradtage")
-    plt.grid(True)
-    plt.show()
+def filter_temperature_rows(df_tagesmittelwerte):
+    # TODO: Filterung nach Tagesmittel der Lufttemperatur in df_tagesmittelwerte
+    df_temp = df_tagesmittelwerte
+    df_temp
     return
 
 

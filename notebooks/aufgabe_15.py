@@ -21,7 +21,7 @@ def _():
     import requests
     import pandas as pd
     import numpy as np
-    return io, mo, pd, requests
+    return io, mo, np, pd, requests
 
 
 @app.cell
@@ -45,28 +45,40 @@ def csv_export_url_to_dataframe(io, pd, requests):
 
 
 @app.cell
-def get_tagesmittelwerte_2024(csv_export_url_to_dataframe):
+def get_tagesmittelwerte_2024(csv_export_url_to_dataframe, np):
     url_tagesmittelwerte = "https://data.stadt-zuerich.ch/dataset/ugz_meteodaten_tagesmittelwerte/download/ugz_ogd_meteo_d1_2024.csv"
     df_tagesmittelwerte = csv_export_url_to_dataframe(url_tagesmittelwerte)
-    df_tagesmittelwerte
-    return (df_tagesmittelwerte,)
+    # Schritt 1: Filterung nach Tagesmittel der Lufttemperatur (aus Aufgabe 12)
+    df_temp = df_tagesmittelwerte.loc[df_tagesmittelwerte['Parameter'] == 'T']
+    # Schritt 2: Standort manipulieren (aus Aufgabe 13)
+    df_temp_manipulated = df_temp.replace({"Standort": {"Zch_": ""}}, regex=True)
+    # Schritt 3: Heizgradtag & akkumulierte Temperaturdifferenz berechnen (aus Aufgabe 14)
+    df_temp_calculated = df_temp_manipulated.copy()
+    df_temp_calculated["Heizgradtag"] = np.where(df_temp_calculated["Wert"] < 12, 20 - df_temp_calculated["Wert"], 0)
+    df_temp_calculated["akkumulierteTemperaturdifferenz"] = np.maximum(0, 12 - df_temp_calculated["Wert"])
+    return (df_temp_calculated,)
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    Filtern Sie in `df_tagesmittelwerte` die Zeilen mit **Tagesmittel der Lufttemperatur**.
+    Aggregieren Sie den Datensatz `df_temp_calculated` nach `Monat`, `Jahr` und `Standort`.
 
     **pandas-Konzepte:**
-    - `DataFrame.loc[mask, :]` oder `query()` zum Filtern
+    - `groupby(...).agg()`
+    - `pd.to_datetime()` und `.dt.to_period("M")`
     """)
     return
 
 
 @app.cell
-def filter_temperature_rows(df_tagesmittelwerte):
-    df_temp = df_tagesmittelwerte.loc[df_tagesmittelwerte['Parameter'] == 'T']
-    df_temp
+def aggregate_monthly(df_temp_calculated, pd):
+    df_monthly = df_temp_calculated
+    df_monthly["Datum"] = pd.to_datetime(df_monthly["Datum"])
+    df_monthly["Jahr_Monat"] = df_monthly["Datum"].dt.to_period("M")
+    # TODO: Gruppieren nach Jahr_Monat und Standort und Aggregation der berechneten Spalten
+    df_monthly = df_temp_calculated
+    df_monthly
     return
 
 
