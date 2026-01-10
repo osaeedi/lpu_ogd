@@ -45,18 +45,40 @@ def csv_export_url_to_dataframe(io, pd, requests):
 
 
 @app.cell
+def get_heizgradtage(csv_export_url_to_dataframe):
+    url_hgt = "https://data.stadt-zuerich.ch/dataset/umw_heizgradtage_standort_jahr_monat_od1031/download/UMW103OD1031.csv"
+    df_heizgradtage = csv_export_url_to_dataframe(url_hgt)
+    df_heizgradtage
+    return (df_heizgradtage,)
+
+
+@app.cell
 def get_energieverbrauch(csv_export_url_to_dataframe):
     url_energie = "https://data.stadt-zuerich.ch/dataset/ugz_endenergiebilanz/download/ugz_endenergiebilanz.csv"
     df_energieverbrauch = csv_export_url_to_dataframe(url_energie)
     df_energieverbrauch
-    return
+    return (df_energieverbrauch,)
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md(r"""
-    Was fällt Ihnen an den Werten der Spalte `Holz_UW_BG_SK` auf? Identifizieren Sie Ausreisser (Outliers). Warum werden so viele Werte als Ausreisser erkannt?
+    mo.md("""
+    Die Spalten `Holz_UW_BG_SK`, `Fernwaerme`, `Erdgas` und `Heizoel_EL` erfassen Energieträger zu Heizzwecken. Erstellen Sie aus `df_heizgradtage` und `df_energieverbrauch` ein DataFrame mit `Jahr`, `Heizgradtag`, `Heizenergieverbrauch`.
     """)
+    return
+
+
+@app.cell
+def transform_and_merge(df_energieverbrauch, df_heizgradtage, pd):
+    heiz_cols = ["Holz_UW_BG_SK", "Fernwaerme", "Erdgas", "Heizoel_EL"]
+    df_heiz = (
+        df_energieverbrauch[["Jahr", *heiz_cols]]
+        .assign(Heizenergieverbrauch=lambda d: d[heiz_cols].sum(axis=1, numeric_only=True))
+        [["Jahr", "Heizenergieverbrauch"]]
+    )
+    df_hgt_jahr = df_heizgradtage.groupby("Jahr", as_index=False)["Heizgradtag"].sum()
+    df_merged = pd.merge(df_heiz, df_hgt_jahr, on="Jahr", how="left")
+    df_merged
     return
 
 

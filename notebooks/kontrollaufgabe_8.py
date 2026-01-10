@@ -10,7 +10,7 @@
 
 import marimo
 
-__generated_with = "0.18.4"
+__generated_with = "0.19.1"
 app = marimo.App(width="medium", auto_download=["html"])
 
 
@@ -39,24 +39,37 @@ def csv_export_url_to_dataframe(io, pd, requests):
         """
         resp = requests.get(url, timeout=60)
         resp.raise_for_status()
-        df = pd.read_csv(io.BytesIO(resp.content), encoding="utf-8")
+        df = pd.read_csv(io.BytesIO(resp.content), sep=None, engine="python", encoding="utf-8")
         return df
     return (csv_export_url_to_dataframe,)
-
-
-@app.cell
-def get_energieverbrauch(csv_export_url_to_dataframe):
-    url_energie = "https://data.stadt-zuerich.ch/dataset/ugz_endenergiebilanz/download/ugz_endenergiebilanz.csv"
-    df_energieverbrauch = csv_export_url_to_dataframe(url_energie)
-    df_energieverbrauch
-    return
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    Was fällt Ihnen an den Werten der Spalte `Holz_UW_BG_SK` auf? Identifizieren Sie Ausreisser (Outliers). Warum werden so viele Werte als Ausreisser erkannt?
+    Diese Aufgabe basiert auf Kontrollaufgabe 3. Nehmen Sie den Standort, den Sie in dieser Aufgabe gewählt haben, und zeigen Sie mithilfe eines Boxplots, ob das **Nudging** bei dieser Messstelle funktioniert hat oder nicht.
     """)
+    return
+
+
+@app.cell
+def load_smiley_stats(csv_export_url_to_dataframe):
+    # URL zum Datensatz mit Statistiken
+    # Bitte durch die gefilterte URL vom Portal ersetzen (nach Standort gefiltert)
+    url_stats = "https://data.bs.ch/api/explore/v2.1/catalog/datasets/100277/exports/csv"
+    df_stats = csv_export_url_to_dataframe(url_stats)
+    df_stats
+    return
+
+
+@app.cell
+def create_boxplot():
+    # Erstellen Sie hier einen Boxplot, der die Geschwindigkeiten nach Phasen gruppiert
+    # Phasen: Vormessung, Betrieb, Nachmessung
+    # Zeigen Sie, ob das Nudging funktioniert hat
+
+    # Ihre Implementierung hier
+    pass
     return
 
 

@@ -21,7 +21,7 @@ def _():
     import requests
     import pandas as pd
     import matplotlib.pyplot as plt
-    return io, mo, pd, plt, requests
+    return io, mo, pd, requests
 
 
 @app.cell
@@ -45,14 +45,6 @@ def csv_export_url_to_dataframe(io, pd, requests):
 
 
 @app.cell
-def get_heizgradtage(csv_export_url_to_dataframe):
-    url_hgt = "https://data.stadt-zuerich.ch/dataset/umw_heizgradtage_standort_jahr_monat_od1031/download/UMW103OD1031.csv"
-    df_heizgradtage = csv_export_url_to_dataframe(url_hgt)
-    df_heizgradtage
-    return (df_heizgradtage,)
-
-
-@app.cell
 def get_energieverbrauch(csv_export_url_to_dataframe):
     url_energie = "https://data.stadt-zuerich.ch/dataset/ugz_endenergiebilanz/download/ugz_endenergiebilanz.csv"
     df_energieverbrauch = csv_export_url_to_dataframe(url_energie)
@@ -60,47 +52,42 @@ def get_energieverbrauch(csv_export_url_to_dataframe):
     return (df_energieverbrauch,)
 
 
-@app.cell
-def transform_and_merge(df_energieverbrauch, df_heizgradtage, pd):
-    heiz_cols = ["Holz_UW_BG_SK", "Fernwaerme", "Erdgas", "Heizoel_EL"]
-    df_heiz = (
-        df_energieverbrauch[["Jahr", *heiz_cols]]
-        .assign(Heizenergieverbrauch=lambda d: d[heiz_cols].sum(axis=1, numeric_only=True))
-        [["Jahr", "Heizenergieverbrauch"]]
-    )
-    df_hgt_jahr = df_heizgradtage.groupby("Jahr", as_index=False)["Heizgradtag"].sum()
-    df_merged = pd.merge(df_heiz, df_hgt_jahr, on="Jahr", how="left")
-    df_merged
-    return (df_merged,)
-
-
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    Visualisieren Sie den Zusammenhang zwischen Heizgradtagen und Heizenergieverbrauch mittels Scatterplot. Entspricht das Ihrer Erwartung? Begründen Sie. Welche Informationen fehlen für eine Beurteilung?
+    Was fällt Ihnen an den Werten der Spalte `Holz_UW_BG_SK` auf? Identifizieren Sie Ausreisser (Outliers). Warum werden so viele Werte als Ausreisser erkannt?
     """)
     return
 
 
 @app.cell
-def plot(df_merged, plt):
-    plt.figure(figsize=(8, 6))
-    plt.scatter(df_merged["Heizgradtag"], df_merged["Heizenergieverbrauch"], alpha=0.7)
-    plt.title("Heizgradtage vs. Heizenergieverbrauch")
-    plt.xlabel("Heizgradtage [Tage]")
-    plt.ylabel("Heizenergieverbrauch [GWh]")
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
-    plt.show()
-    return
+def outlier_function(pd):
+    def is_outlier_iqr(series: pd.Series, k: float = 1.5) -> pd.Series:
+        """
+        IQR-basierte Ausreisser-Erkennung.
+
+        Args:
+            series: Numerische Werte.
+            k: Multiplikator für die IQR-Bandbreite (Standard 1.5).
+
+        Returns:
+            Boolesche Maske gleicher Länge (True = Ausreisser).
+        """
+        s = pd.to_numeric(series, errors="coerce")
+        q1 = s.quantile(0.25, interpolation="linear")
+        q3 = s.quantile(0.75, interpolation="linear")
+        iqr = q3 - q1
+        lower = q1 - k * iqr
+        upper = q3 + k * iqr
+        mask = (s < lower) | (s > upper)
+        return mask.fillna(False)
+    return (is_outlier_iqr,)
 
 
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""
-    Hinweis: Die Bevölkerungsentwicklung verändert den Vergleich über die Jahre. "
-        "Frühere Jahre hatten mehr Heizgradtage, aber eine kleinere Bevölkerung.
-    """)
+@app.cell
+def get_outliers(df_energieverbrauch, is_outlier_iqr):
+    df_outliers = df_energieverbrauch[is_outlier_iqr(df_energieverbrauch["Holz_UW_BG_SK"])]
+    df_outliers
     return
 
 

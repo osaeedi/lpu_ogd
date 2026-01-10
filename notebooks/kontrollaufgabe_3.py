@@ -10,16 +10,8 @@
 
 import marimo
 
-__generated_with = "0.18.4"
+__generated_with = "0.19.0"
 app = marimo.App(width="medium", auto_download=["html"])
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""
- 
-    """)
-    return
 
 
 @app.cell
@@ -47,32 +39,56 @@ def csv_export_url_to_dataframe(io, pd, requests):
         """
         resp = requests.get(url, timeout=60)
         resp.raise_for_status()
-        df = pd.read_csv(io.BytesIO(resp.content), encoding="utf-8")
+        df = pd.read_csv(io.BytesIO(resp.content), sep=None, engine="python", encoding="utf-8")
         return df
     return (csv_export_url_to_dataframe,)
 
 
-@app.cell
-def get_heizgradtage(csv_export_url_to_dataframe):
-    url_hgt = "https://data.stadt-zuerich.ch/dataset/umw_heizgradtage_standort_jahr_monat_od1031/download/UMW103OD1031.csv"
-    df_heizgradtage = csv_export_url_to_dataframe(url_hgt)
-    df_heizgradtage
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    ## Kontrollaufgabe 3: Datenqualität Smiley-Geschwindigkeitsanzeigen
+
+    Der Datensatz [Einzelmessungen der Smiley-Geschwindigkeitsanzeigen](https://data.bs.ch/explore/dataset/100268/) zeigt die Messungen von Verkehrsteilnehmenden, die bei einer Smiley-Geschwindigkeitsanzeige vorbeifahren. Smiley-Geschwindigkeitsanzeigen ist eine Nudging-Methode, die auf einem Display ein Smiley (meist Grün) oder ein trauriges Gesicht (meist rot) anzeigt, je nach dem, ob die Person zu schnell gefahren ist.
+
+    **Hinweis:** Wenn Sie den Datensatz auf dem Portal nach Standort und Zyklus filtern, können Sie im **Export**-Register die URL zum gefilterten Datensatz erhalten.
+    """)
     return
 
 
 @app.cell
-def get_energieverbrauch(csv_export_url_to_dataframe):
-    url_energie = "https://data.stadt-zuerich.ch/dataset/ugz_endenergiebilanz/download/ugz_endenergiebilanz.csv"
-    df_energieverbrauch = csv_export_url_to_dataframe(url_energie)
-    df_energieverbrauch
+def load_smiley_data(csv_export_url_to_dataframe):
+    # URL zum Datensatz (kann nach Standort/Zyklus gefiltert werden)
+    # Beispiel-URL - bitte durch die gefilterte URL vom Portal ersetzen
+    url_smiley = "https://data.bs.ch/api/explore/v2.1/catalog/datasets/100268/exports/csv"
+    df_smiley = csv_export_url_to_dataframe(url_smiley)
+    df_smiley
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md("""
-    Die Spalten `Holz_UW_BG_SK`, `Fernwaerme`, `Erdgas` und `Heizoel_EL` erfassen Energieträger zu Heizzwecken. Erstellen Sie aus `df_heizgradtage` und `df_energieverbrauch` ein DataFrame mit `Jahr`, `Heizgradtag`, `Heizenergieverbrauch`.
+    mo.md(r"""
+    Wie könnte man bei diesem Datensatz die Datenqualität verbessern? Wählen Sie einen Smiley-Standort in einem Zyklus Ihrer Wahl und implementieren Sie Ihre Idee.
     """)
+    return
+
+
+@app.cell
+def improve_data_quality(df_filtered):
+    # Implementieren Sie hier Ihre Ideen zur Datenqualitätsverbesserung
+    # Mögliche Ansätze:
+    # - Fehlende Werte behandeln
+    # - Ausreisser identifizieren und behandeln
+    # - Inkonsistenzen korrigieren
+    # - Datentypen korrigieren
+    # - Duplikate entfernen
+    # etc.
+
+    df_improved = df_filtered.copy()
+    # Ihre Implementierung hier
+
+    df_improved
     return
 
 

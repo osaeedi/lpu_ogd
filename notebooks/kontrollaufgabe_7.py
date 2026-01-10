@@ -45,6 +45,14 @@ def csv_export_url_to_dataframe(io, pd, requests):
 
 
 @app.cell
+def get_heizgradtage(csv_export_url_to_dataframe):
+    url_hgt = "https://data.stadt-zuerich.ch/dataset/umw_heizgradtage_standort_jahr_monat_od1031/download/UMW103OD1031.csv"
+    df_heizgradtage = csv_export_url_to_dataframe(url_hgt)
+    df_heizgradtage
+    return
+
+
+@app.cell
 def get_energieverbrauch(csv_export_url_to_dataframe):
     url_energie = "https://data.stadt-zuerich.ch/dataset/ugz_endenergiebilanz/download/ugz_endenergiebilanz.csv"
     df_energieverbrauch = csv_export_url_to_dataframe(url_energie)
@@ -55,7 +63,7 @@ def get_energieverbrauch(csv_export_url_to_dataframe):
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
-    Was fällt Ihnen an den Werten der Spalte `Holz_UW_BG_SK` auf? Identifizieren Sie Ausreisser (Outliers). Warum werden so viele Werte als Ausreisser erkannt?
+    Visualisieren Sie den Zusammenhang zwischen Heizgradtagen und Heizenergieverbrauch mittels Scatterplot. Entspricht das Ihrer Erwartung? Begründen Sie. Welche Informationen fehlen für eine Beurteilung?
     """)
     return
 
